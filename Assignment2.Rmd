@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(rethinking)
 ```
 
 ## In this assignment we learn how to assess rates from a binomial distribution, using the case of assessing your teachers' knowledge of CogSci
@@ -33,19 +34,166 @@ Questions:
 - Then implement a quadratic approximation (hint check paragraph 2.4.2!).
 - N.B. for the rest of the exercise just keep using the grid approximation (we'll move to quadratic approximations in two classes)
 
+```{r}
+
+
+#define grid
+dens = 20
+p_grid = seq(from= 0, to = 1, length.out = dens)
+
+#define prior
+prior = rep(1, dens) #flat
+
+#compute likelihood at each value in grid
+likelihood = dbinom(3, size = 6, prob=p_grid)
+
+#compute product of likelihood and prior
+unstd.posterior = likelihood * prior
+
+#standardize the posterior so it sums to 1
+posterior = unstd.posterior / sum(unstd.posterior)
+
+
+Data=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood)
+
+#riccardo's estimated knowledge of cog sci:
+ggplot(Data,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red')+  xlab("Probability of Riccardo answering correct")+ ylab("posterior probability")
+
+#What is the probability he knows more than chance (0.5) [try figuring this out.
+sum(posterior[p_grid > 0.5])
+
+#Then implement a quadratic approximation (hint check paragraph 2.4.2!)
+riccardo.qa <- map(alist(
+  w ~ dbinom(6,p) , # binomial likelihood   
+  p ~ dunif(0,1) # uniform prior  
+  ),  data=list(w=3) ) 
+
+precis(riccardo.qa) 
+
+```
+
+
 2. Estimate all the teachers' knowledge of CogSci. Who's best? Use grid approximation. Comment on the posteriors of Riccardo and Mikkel.
 2a. Produce plots of the prior, and posterior for each teacher.
+
+```{r}
+#Estimate all the teachers' knowledge of CogSci.
+
+#kristian 
+
+#compute likelihood at each value in grid
+likelihood = dbinom(2, size = 2, prob=p_grid)
+
+#compute product of likelihood and prior
+unstd.posterior = likelihood * prior
+
+#standardize the posterior so it sums to 1
+posterior = unstd.posterior / sum(unstd.posterior)
+
+Data_KT=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood)
+
+#Kristian's estimated knowledge of cog sci:
+ggplot(Data_KT,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red')+  xlab("Probability of Kristian answering correct")+ ylab("posterior probability")
+
+
+#_____________________________________________________
+
+#Josh
+#compute likelihood at each value in grid
+likelihood = dbinom(160, size = 198, prob=p_grid)
+
+#compute product of likelihood and prior
+unstd.posterior = likelihood * prior
+
+#standardize the posterior so it sums to 1
+posterior = unstd.posterior / sum(unstd.posterior)
+
+Data_JS=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood)
+
+#Josh estimated knowledge of cog sci:
+ggplot(Data_JS,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red')+  xlab("Probability of Kristian answering correct")+ ylab("posterior probability")
+
+#Produce plots of the prior
+
+#_____________________________________________________
+
+
+#Mikkel
+#compute likelihood at each value in grid
+likelihood = dbinom(66, size = 132, prob=p_grid)
+
+#compute product of likelihood and prior
+unstd.posterior = likelihood * prior
+
+#standardize the posterior so it sums to 1
+posterior = unstd.posterior / sum(unstd.posterior)
+
+Data_MW=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood)
+
+#Mikkel estimated knowledge of cog sci:
+ggplot(Data_JS,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior/dens),color='red')+  xlab("Probability of Kristian answering correct")+ ylab("posterior probability")
+
+#Produce plots of the prior
+
+#Who's best?
+#What is the probability they know more than chance (0.5) [try figuring this out.
+sum(posterior[p_grid > 0.5])
+#Riccardo = 0.5
+#kristian = 0.88
+#Josh = 1
+#Mikkel = 0.5
+
+
+
+
+
+```
+
 
 3. Change the prior. Given your teachers have all CogSci jobs, you should start with a higher appreciation of their knowledge: the prior is a normal distribution with a mean of 0.8 and a standard deviation of 0.2. Do the results change (and if so how)?
 3a. Produce plots of the prior and posterior for each teacher.
 
-4. You go back to your teachers and collect more data (multiply the previous numbers by 100). Calculate their knowledge with both a uniform prior and a normal prior with a mean of 0.8 and a standard deviation of 0.2. Do you still see a difference between the results? Why?
+```{r}
+
+#Change the prior
+
+prior_new <- dnorm( p_grid , 0.8 , 0.2 )
+
+
+
+#Do the results change (and if so how)?
+
+
+#compute likelihood at each value in grid
+likelihood = dbinom(3, size = 6, prob=p_grid)
+
+#compute product of likelihood and prior
+unstd.posterior = likelihood * prior_new
+
+#standardize the posterior so it sums to 1
+posterior = unstd.posterior / sum(unstd.posterior)
+
+Data_R_new=data.frame(grid=p_grid,posterior=posterior,prior=prior,likelihood=likelihood)
+
+#Riccardo estimated knowledge of cog sci new prior:
+ggplot(Data_R_new,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior_new/dens),color='red')+  xlab("Probability of Riccardo answering correct")+ ylab("posterior probability")
+
+
+
+
+```
+
+
+4. You go back to your teachers and collect more data (multiply the previous numbers by 100). Calculate their knowledge with both a uniform prior and a normal prior with a mean of 0.8 and a standard deviation of 0.2. Do you still see a difference between the results? Why? #own notes: reflect on: how does having more data change the effect
+```{r}
+
+```
 
 5. Imagine you're a skeptic and think your teachers do not know anything about CogSci, given the content of their classes. How would you operationalize that belief?
 
 6. Optional question: Can you estimate the difference between Riccardo's estimated knowledge and that of each of the other teachers? Would you deem it credible (that is, would you believe that it is actually different)?
 
-7. Bonus knowledge: all the stuff we have done can be implemented in a lme4-like fashion using the brms package. Here is an example.
+7. Bonus knowledge: all the stuff we have done can be implemented in a lme4-like fashion using the brms package. Here is an example. #you can use this to check (approx) the answers in the other questions 
 ```{r}
 library(brms)
 d <- data.frame(
