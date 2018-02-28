@@ -157,7 +157,9 @@ sum(posterior[p_grid > 0.5])
 
 #Change the prior
 
-prior_new <- dnorm( p_grid , 0.8 , 0.2 )
+prior_new <- dnorm( p_grid , 0.8#mean
+                    , 0.2 #sd
+                    )
 
 
 
