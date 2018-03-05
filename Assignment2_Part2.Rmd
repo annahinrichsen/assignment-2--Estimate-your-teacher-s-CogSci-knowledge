@@ -7,13 +7,17 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(rethinking)
+
 ```
 
 ## In this assignment we learn how to assess rates from a binomial distribution, using the case of assessing your teachers' knowledge of CogSci.
 
 ### Second part: Focusing on predictions
 
-Last year you assessed the teachers (darned time runs quick!). Now you want to re-test them and assess whether your models are producing reliable predictions. In Methods 3 we learned how to do machine-learning style assessment of predictions (e.g. rmse on testing datasets). Bayesian stats makes things a bit more complicated. So we'll try out how that works. N.B. You can choose which prior to use for the analysis of last year's data.
+Last year you assessed the teachers (darned time runs quick!). Now you want to re-test them and assess whether your models are producing reliable predictions. In Methods 3 we learned how to do machine-learning style assessment of predictions (e.g. rmse on testing datasets). Bayesian stats makes things a bit more complicated. So we'll try out how that works. 
+N.B. You can choose which prior to use for the analysis of last year's data. (own notes: doesn't matter if uniform or normal prior)
 
 Questions to be answered (but see guidance below):
 1- Write a paragraph discussing how assessment of prediction performance is different in Bayesian vs. frequentist models
@@ -33,10 +37,179 @@ This is the new data:
 
 Guidance Tips
 
-1. There are at least two ways of assessing predictions.
-2. Last year's results are this year's expectations.
-3. Are the parameter estimates changing? (way 1)
-4. How does the new data look in last year's predictive posterior? (way 2)
+1. There are at least two ways of assessing predictions. 
+2. Last year's results are this year's expectations. #own notes: using old posteriors as priors 
+3. Are the parameter estimates changing? (way 1) #own notes: the posterior: old ways: betas. look at posterior of the model describing data from last year. 
+4. How does the new data look in last year's predictive posterior? (way 2) #own notes: plot
+
+
+
+```{r}
+
+#Riccardo
+#define grid
+
+dens = 20
+p_grid = seq(from= 0, to = 1, length.out = dens)
+
+
+
+#old posteriors 
+prior_new <- dnorm( p_grid , 0.8, 0.2)
+#compute likelihood at each value in grid
+likelihood_new = dbinom(3, size = 6 , prob=p_grid)
+#compute product of likelihood and prior
+unstd.posterior_new = likelihood_new * prior_new
+#standardize the posterior so it sums to 1
+posterior = unstd.posterior_new / sum(unstd.posterior_new)
+Data_new_prior=data.frame(grid=p_grid,posterior=posterior,prior=prior_new,likelihood=likelihood_new)
+#Riccardo estimated knowledge of cog sci new prior:
+ggplot(Data_new_prior,aes(grid,posterior))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior_new/dens),color='red')+  xlab("Probability of Riccardo answering correct")+ ylab("posterior probability")
+
+
+
+
+#define prior for the new data - use old data
+#prior riccardo
+prior_now = posterior
+
+#compute likelihood at each value in grid
+likelihood_now = dbinom(9, size = 10 , prob=p_grid)
+
+#compute product of likelihood and prior
+unstd.posterior_now = likelihood_now * prior_now
+
+#standardize the posterior so it sums to 1
+posterior_now = unstd.posterior_now / sum(unstd.posterior_now)
+
+Data2=data.frame(grid=p_grid,posterior=posterior_now,prior=prior_now,likelihood=likelihood_now)
+
+#Riccardo estimated knowledge of cog sci new prior:
+ggplot(Data2,aes(grid,posterior_now))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior_now/dens),color='red')+  xlab("Probability of Riccardo answering correct")+ ylab("posterior probability")
+
+
+
+#____________________________________________________
+#prior Kristian
+
+prior_new <- dnorm( p_grid , 0.8, 0.2)
+#compute likelihood at each value in grid
+likelihood_new = dbinom(2, size = 2 , prob=p_grid)
+#compute product of likelihood and prior
+unstd.posterior_new = likelihood_new * prior_new
+#standardize the posterior so it sums to 1
+posterior = unstd.posterior_new / sum(unstd.posterior_new)
+Data_new_prior=data.frame(grid=p_grid,posterior=posterior,prior=prior_new,likelihood=likelihood_new)
+
+#define prior for the new data - use old data
+#prior riccardo
+prior_now = posterior
+
+#compute likelihood at each value in grid
+likelihood_now = dbinom(8, size = 12 , prob=p_grid)
+
+#compute product of likelihood and prior
+unstd.posterior_now = likelihood_now * prior_now
+
+#standardize the posterior so it sums to 1
+posterior_now = unstd.posterior_now / sum(unstd.posterior_now)
+
+Data2=data.frame(grid=p_grid,posterior=posterior_now,prior=prior_now,likelihood=likelihood_now)
+
+#Riccardo estimated knowledge of cog sci new prior:
+ggplot(Data2,aes(grid,posterior_now))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior_now/dens),color='red')+  xlab("Probability of Kristian answering correct")+ ylab("posterior probability")
+
+
+#_________________________________Josh
+#prior Josh
+
+prior_new <- dnorm( p_grid , 0.8, 0.2)
+#compute likelihood at each value in grid
+likelihood_new = dbinom(160, size = 198 , prob=p_grid)
+#compute product of likelihood and prior
+unstd.posterior_new = likelihood_new * prior_new
+#standardize the posterior so it sums to 1
+posterior = unstd.posterior_new / sum(unstd.posterior_new)
+Data_new_prior=data.frame(grid=p_grid,posterior=posterior,prior=prior_new,likelihood=likelihood_new)
+
+#define prior for the new data - use old data
+#prior riccardo
+prior_now = posterior
+
+#compute likelihood at each value in grid
+likelihood_now = dbinom(148, size = 172 , prob=p_grid)
+
+#compute product of likelihood and prior
+unstd.posterior_now = likelihood_now * prior_now
+
+#standardize the posterior so it sums to 1
+posterior_now = unstd.posterior_now / sum(unstd.posterior_now)
+
+Data2=data.frame(grid=p_grid,posterior=posterior_now,prior=prior_now,likelihood=likelihood_now)
+
+#Riccardo estimated knowledge of cog sci new prior:
+ggplot(Data2,aes(grid,posterior_now))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior_now/dens),color='red')+  xlab("Probability of Josh answering correct")+ ylab("posterior probability")
+
+
+#_________________________________Mikkel
+#prior Mikkel
+
+prior_new <- dnorm( p_grid , 0.8, 0.2)
+#compute likelihood at each value in grid
+likelihood_new = dbinom(66, size = 132 , prob=p_grid)
+#compute product of likelihood and prior
+unstd.posterior_new = likelihood_new * prior_new
+#standardize the posterior so it sums to 1
+posterior = unstd.posterior_new / sum(unstd.posterior_new)
+Data_new_prior=data.frame(grid=p_grid,posterior=posterior,prior=prior_new,likelihood=likelihood_new)
+
+#define prior for the new data - use old data
+#prior riccardo
+prior_now = posterior
+
+#compute likelihood at each value in grid
+likelihood_now = dbinom(34, size = 65 , prob=p_grid)
+
+#compute product of likelihood and prior
+unstd.posterior_now = likelihood_now * prior_now
+
+#standardize the posterior so it sums to 1
+posterior_now = unstd.posterior_now / sum(unstd.posterior_now)
+
+Data2=data.frame(grid=p_grid,posterior=posterior_now,prior=prior_now,likelihood=likelihood_now)
+
+#Riccardo estimated knowledge of cog sci new prior:
+ggplot(Data2,aes(grid,posterior_now))+  geom_point()+geom_line()+theme_classic()+  geom_line(aes(grid,prior_now/dens),color='red')+  xlab("Probability of Mikkel answering correct")+ ylab("posterior probability")
+
+
+
+
+
+
+```
+Predictive posteriors
+
+
+```{r}
+#How does the new data look in last year's predictive posterior? (way 2) #own notes: plot
+#riccardo
+
+likelihood_ric = dbinom(3, size = 6 , prob=p_grid)
+#compute product of likelihood and prior
+unstd.posterior_ric = likelihood_ric * prior_new
+#standardize the posterior so it sums to 1
+posterior_ric = unstd.posterior_ric / sum(unstd.posterior_ric)
+
+sampled_data = sample(p_grid, prob = posterior_ric, size = 10000, replace = TRUE)
+
+w <- rbinom( 1e4 , size=10 , prob=sampled_data ) 
+simplehist(w, xlab = "correct questions")
+
+simplehis
+
+```
+
+
 
 
 ### Depending on time: Questions from the handbook
